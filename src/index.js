@@ -48,8 +48,16 @@ var video=[];
 var gui;
 var obj;
 var stats;
-var childd;
+var childd=[];
 var childdd;
+//DownLoader
+var INTERSECTED = null;
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2( Infinity, Infinity );
+var group = new THREE.Object3D();
+var Gltf_number=0;
+var indexmodel=0;
+var action;
 function init() 
 {
 	
@@ -114,51 +122,6 @@ function addLights()
 	scene.add(light);
 }
 
-function addGUI() 
-{
-	stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-	document.body.appendChild( stats.dom );
-	var guiALL= gui.addFolder('Light');
-	var guiSL = guiALL.addFolder('SpotLight');
-	guiSL.add(obj, 'helpSpot').onChange(function (val) {
-		spotLightHelper.visible = val;
-	});
-	guiSL.add(obj, 'posX').onChange(function (val) {
-		spotLight.position.x = val;
-		spotLightHelper.update();
-	});
-	guiSL.add(obj, 'posY').onChange(function (val) {
-		spotLight.position.y = val;
-		spotLightHelper.update();
-
-	});
-	guiSL.add(obj, 'posZ').onChange(function (val) {
-		spotLight.position.z = val;
-		spotLightHelper.update();
-
-	});
-	//Ambient Light
-	var guiAL = guiALL.addFolder('AmbientLight');
-	guiAL.addColor(obj, 'color0').onChange(function (val) {
-		light.color.set(val);
-		hemisLight.color.set(val);
-	});
-	guiAL.add(obj, 'intAmbien').min(0).max(1).step(0.1).onChange(function (val) {
-		light.intensity = val;
-	}).name('Intensity');
-
-	//Hemisphere Light
-	var guiHL = guiALL.addFolder('HemisphereLight');
-	guiHL.addColor(obj, 'colorg').onChange(function (val) {
-		hemisLight.groundColor.set(val);
-	});
-	guiHL.add(obj, 'intHemis').min(0).max(1).step(0.1).onChange(function (val) {
-		hemisLight.intensity = val;
-	}).name('Intensity');
-	
-
-	
-}
 
 function main() {
 
@@ -173,7 +136,7 @@ function main() {
     renderer.gammaFactor = 2.2;
    // renderer.shadowMap.enabled = true;
 //	renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-	
+document.body.appendChild( renderer.domElement );
 	//Camera
 	camera.position.x = 14;
 	camera.position.y = 2;
@@ -183,60 +146,23 @@ function main() {
 
 	addLights();
 
-	//Models
-	// loadDraco('model/draco/alocasia_s.drc');
-	// loadGLTF('model/glb/Flamingo.glb', [-2, 2, 1], [0.01, 0.01, 0.01]);
-	/// 
-	
-	loadGLTF('model/gltf/capoeira/Capoeira.gltf', [1, 0, 0], [0.01, 0.01, 0.01]).then(function(gltff){
-		console.log('termine gltf!');
-		mixerCap = new THREE.AnimationMixer( gltff.scene );
-		var action = mixerCap.clipAction( gltff.animations[ 0 ] );
-		action.play();
-		
-	}).catch(function (err) {
-		console.log(err);
-		
-	});/*
-    loadGLTFF('model/gltf/GLTFMATCAP/scene.gltf', [1, 0, 0], [0.5, 0.5, 0.5]).then(function(gltf){
-		console.log('termine gltf!');
-		mixerCap = new THREE.AnimationMixer( gltf.scene );
-		var action = mixerCap.clipAction( gltf.animations[ 0 ] );
-		action.play();
-		
-	}).catch(function (err) {
-		console.log(err);
-	});/*
-	loadGLTFF('model/gltf/miguelangelo/scene.gltf', [1, 0, 0], [0.5, 0.5, 0.5]).then(function(gltf){
-		console.log('termine gltf!');
-		mixerCap = new THREE.AnimationMixer( gltf.scene );
-		var action = mixerCap.clipAction( gltf.animations[ 0 ] );
-		action.play();
-		
-	}).catch(function (err) {
-		console.log(err);
-	});/**/ 
-	loadFBX('model/fbx/avatar1.fbx', [2, 0, -1], [0.01, 0.01, 0.01]).then(function(obj1){
-		// console.log('termine!');
+
+
+
+	loadFBX('model/fbx/avatar1.fbx', [2, 0, 10], [0.01, 0.01, 0.01]).then(function(obj1){
+		console.log('termine!');
 		mixer = new THREE.AnimationMixer( obj1 );
-		var action = mixer.clipAction( obj1.animations[ 0 ] );
+	var action = mixer.clipAction( obj1.animations[ 0 ] );
 		action.play();
-		
+
 	})
+	
+	loadModels();
 	//*/
 	 /*****************************START ADDED CODE***************/
 	 
-	 //create video
-	 for (let index = 0; index < 3; index++) {
-		 video[index]= document.createElement('video');
-		 video[index].load();
-		 video[index].autoplay= true;
-		 video[index].needsUpdate= true;
-		 video[index].loop	= true;
-		
-	 }
-	 
-	 
+	 //action.play();
+	 boxes();
         var floorTexture = new THREE.TextureLoader().load( 'images/checkerboard.jpg' )
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 	floorTexture.repeat.set( 10, 10 );
@@ -246,143 +172,52 @@ function main() {
 		new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010, map: floorTexture, side: THREE.DoubleSide} )
 		);
     plane.rotation.x = - Math.PI / 2;
-    plane.receiveShadow = true;
-	scene.add( plane );
+   
 
-
-
-
+		scene.add( plane );
 	
-	
-
-	//engine= new ParticleEngine();
-	//engine.setValues(Examples.fountain);
-	//engine.initialize(scene);
-	//addSkybox(0,false);
-//	addGUI();
-	addGUIFirework();
-	//addGUISkybox();
-//	addGUIChooseSkybox ();
      /*****************************FINISH ADDED CODE**************/
 	
-	
+	 //renderer.domElement.addEventListener( 'click', onMouseClick );
 }
  /*****************************START ADDED CODE***************/
-        function addGUISkybox(){//Create animated sky
-	
-	
-	
-	var guiSLSky = gui.addFolder('Skybox');
-	guiSLSky.add(materiall, 'roughness').min(0).max(1).step(0.1).onChange(function (val) {
-		materiall.roughness = val;
-		//materiall.update();
-	});
-	guiSLSky.add(materiall, 'metalness').min(0).max(1).step(0.1).onChange(function (val) {
-		materiall.metalness = val;
-		//materiall.update();
 
-	});
-	
-
-}
-function addSkybox(num,	isnotfirsttime){//Create animated sky
-
-	
-	var texture;
-	
-	//choose the video
-	if (num== 0){
-		video[2].src	= "images/Lluvia.mp4";
-		video[0].src	= "images/Sky.mp4";
-		video[0].autoplay= true;	
-		video[2].autoplay= true;
-		 texture = new THREE.VideoTexture( video[0] );
-	} 
-	if (num== 1){
-		video[1].autoplay= true;
-		video[2].autoplay= true;
-		video[2].src	= "images/Sky.mp4"; 
-		video[1].src	= "images/Lluvia.mp4";
-		 texture = new THREE.VideoTexture( video[1] );
-	} 
-	if (num==2){
-		video[2].autoplay= true;
-		video[2].src	= "images/Amanecer.mp4";
-		 texture = new THREE.VideoTexture( video[2] );
-		 
-	} 
-	
-	
-	
-	
-
-    var skyGeo;
-    //add sphere
-	skyGeo=	new THREE.SphereGeometry( 300, 30, 30 );
-	
-	//adding the video to the sphere
- 	//var material = new THREE.MeshBasicMaterial({ map: texture,});
-     materiall = new THREE.MeshStandardMaterial( {
-
-    //color: 0xffffff,
-
-    roughness: 1,
-    metalness: 1,
-    map: texture,
-
-	} );
-	if (isnotfirsttime){
-		scene.remove( Skybox );
-	}
-	
-	 Skybox = new THREE.Mesh(skyGeo, materiall);
-	// put the video both sides of the sphere
-	Skybox.material.side = THREE.DoubleSide;
-	//Skybox.Side = THREE.DoubleSide;
-	//add sky
-	scene.add(Skybox);
-}
      /*****************************FINISH ADDED CODE**************/
 
-function restartEngine(parameters)
-{
-	//resetCamera();
-	
-	engine.destroy(scene);
-	engine = new ParticleEngine();
-	engine.setValues( parameters );
-	engine.initialize(scene);
-}
+
  /*****************************START ADDED CODE***************/
-        
-function addGUIFirework (){
-	
-	stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-	document.body.appendChild( stats.dom );
-	 var parameters = 
-	{
-		Downloader:   function() { download_image(); },
-			
-	};
-	var guiALLF= gui.addFolder('File');
-	guiALLF.add( parameters, 'Downloader'   ).name("Download");
+     function boxes(){
+		
+		var geometry = new THREE.BoxBufferGeometry( 5, 5 );
+		var material = new THREE.MeshLambertMaterial( { color: 0xdd3322 } );
+		var box = new THREE.Mesh( geometry, material );
+  box.position.set( - 10, 0, 0 );
+ box.link = document.createElement('a');
+box.link.download = "Amanecer.mp4";
+box.link.href = "images/Amanecer.mp4";
+		group.add( box );
+  
+		material = new THREE.MeshLambertMaterial( { color: 0x22dd33 } );
+		box = new THREE.Mesh( geometry, material );
+  box.position.set( 0, 0, 0 );
+  box.link = document.createElement('a');
+box.link.download = "checkerboard.jpg";
+box.link.href = "images/checkerboard.jpg";
 
-}
-
-function addGUIChooseSkybox (){
-	var parameters = 
-   {
-	   blueSky:   function() { addSkybox( 0 , true  ); },
-	   rain:   function() { addSkybox( 1 , true  ); },		
-	   sunrise:   function() { addSkybox( 2 , true  ); }	
-	
-   };
-   var guiALLF= gui.addFolder('Choose Sky');
-   guiALLF.add( parameters, 'blueSky'   ).name("BlueSky");
-   guiALLF.add( parameters, 'rain'   ).name("Rainning");
-   guiALLF.add( parameters, 'sunrise'   ).name("Sunrise");
-
-}
+		group.add( box );
+  
+  material = new THREE.MeshLambertMaterial( { color: 0x3322dd } );
+		box = new THREE.Mesh( geometry, material );
+  box.position.set( 10, 0, 0 );
+  box.link = document.createElement('a');
+box.link.download = "fibranet.pdf";
+box.link.href = "images/fibranet.pdf";
+		group.add( box );
+  
+  scene.add( group )
+  renderer.domElement.addEventListener( 'click', onMouseClick );
+  renderer.domElement.addEventListener( 'mousemove', onMouseMove );
+	 }
      /*****************************FINISH ADDED CODE**************/
 function loadFBX(path,pos,scale) {
 	const promise = new Promise(function (resolve, reject) {
@@ -398,8 +233,10 @@ function loadFBX(path,pos,scale) {
 					child.castShadow = true;
 					child.receiveShadow = true;
 				}
+				//childd[Gltf_number]=child;// Downloader
 			} );
 			scene.add( object );
+			//childd[Gltf_number]=object;// Downloader
 			console.log(object);
 			if (object == null) {
 				reject();
@@ -410,236 +247,15 @@ function loadFBX(path,pos,scale) {
 		} );
 		
 	})
+	
+
 	return promise;
 }
 
-function loadGLTF(path, pos,scale) {
-	return new Promise((resolve, reject)=>{
-
-		// Instantiate a loader
-		var loader = new GLTFLoader();
-	
-		// Optional: Provide a DRACOLoader instance to decode compressed mesh data
-		var dracoLoader = new DRACOLoader();
-		// dracoLoader.setDecoderPath( '/examples/js/libs/draco/' );
-		dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-		loader.setDRACOLoader( dracoLoader );
-	
-		// Load a glTF resource
-		loader.load(
-			// resource URL
-			path,
-			// called when the resource is loaded
-			function ( gltf ) {
-				//Transformations
-				gltf.scene.scale.set(scale[0], scale[1], scale[2]);
-				gltf.scene.position.set(pos[0], pos[1], pos[2]);
-				gltf.scene.castShadow = true;
-				gltf.scene.receiveShadow = true;
-				gltf.scene.traverse( function ( child ) {
-					if ( child.isMesh ) {
-						child.castShadow = true;
-						child.receiveShadow = true;
-					}
-				} );
-				scene.add( gltf.scene );
-				console.log(gltf);
-				
-				gltf.animations; // Array<THREE.AnimationClip>
-				gltf.scene; // THREE.Group
-				gltf.scenes; // Array<THREE.Group>
-				gltf.cameras; // Array<THREE.Camera>
-				gltf.asset; // Object
-				
-				resolve(gltf);
-	
-			},
-			// called while loading is progressing
-			function ( xhr ) {
-	
-				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-	
-			},
-			// called when loading has errors
-			function ( error ) {
-	
-				console.log( 'An error happened' );
-				reject(error);
-			});	
-	});
-}
  /*****************************START ADDED CODE***************/
-        
-function loadGLTFF(path, pos,scale) {
-	
-	return new Promise((resolve, reject)=>{
+     
 
-		// Instantiate a loader
-		var loader = new GLTFLoader();
-	
-		// Optional: Provide a DRACOLoader instance to decode compressed mesh data
-		var dracoLoader = new DRACOLoader();
-		// dracoLoader.setDecoderPath( '/examples/js/libs/draco/' );
-		dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-		loader.setDRACOLoader( dracoLoader );
-	
-		// Load a glTF resource
-		loader.load(
-			// resource URL
-			path,
-			// called when the resource is loaded
-			function ( gltf ) {
-				//Transformations
-				gltf.scene.scale.set(scale[0], scale[1], scale[2]);
-				gltf.scene.position.set(pos[0], pos[1], pos[2]);
-				gltf.scene.castShadow = true;
-				gltf.scene.receiveShadow = true;
-				gltf.scene.traverse( function ( child ) {
-					
-					if ( child.isMesh ) {
-						child.castShadow = true;
-						child.receiveShadow = true;
-					}
-					if(child instanceof THREE.Mesh){
-						
-						child.material.emissive;//= new THREE.Color( 0xfff);
-						child.material.emissiveIntensity ;console.log(child.material);
-						
-						
-					}childdd=child;
-				} );
-				scene.add( gltf.scene );
-				childd=gltf.scene;
-				console.log(gltf);
-				addGUIGLTF();
-				gltf.animations; // Array<THREE.AnimationClip>
-				gltf.scene; // THREE.Group
-				gltf.scenes; // Array<THREE.Group>
-				gltf.cameras; // Array<THREE.Camera>
-				gltf.asset; // Object
 
-				
-				resolve(gltf);
-	
-			},
-			// called while loading is progressing
-			function ( xhr ) {
-	
-				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-	
-			},
-			// called when loading has errors
-			function ( error ) {
-	
-				console.log( 'An error happened' );
-				reject(error);
-			});	
-	});
-}
-function addGUIGLTF(){//Create animated sky
-	
-	
-	
-	var guigltf = gui.addFolder('GLTF');
-	guigltf.add(childdd.material, 'emissiveIntensity').min(0).max(1).step(0.1).onChange(function (val) {
-		
-		childd.traverse( function ( child ) {
-					
-			if ( child.isMesh ) {
-				child.castShadow = true;
-				child.receiveShadow = true;
-			}
-			if(child instanceof THREE.Mesh){
-				
-				
-				child.material.emissiveIntensity = val;
-			}
-		});
-	}).name('Intensity');
-	guigltf.addColor(childdd.material, 'emissive').onChange(function (val) {
-		
-		childd.traverse( function ( child ) {
-					
-			if ( child.isMesh ) {
-				child.castShadow = true;
-				child.receiveShadow = true;
-			}
-			if(child instanceof THREE.Mesh){
-				
-				child.material.emissive=val;
-				
-			}
-		});
-	}).name('Emissive');
-
-	
-	guigltf.add(childdd.material, 'emissiveIntensity').min(0).max(1).step(0.1).onChange(function (val) {
-		
-		childd.traverse( function ( child ) {
-					
-			if ( child.isMesh ) {
-				child.castShadow = true;
-				child.receiveShadow = true;
-			}
-			if(child instanceof THREE.Mesh){
-				
-				
-				child.material.matcap = val;
-			}
-		});
-	}).name('Map');
-	
-	
-}
-
-     /*****************************FINISH ADDED CODE**************/
-function loadDraco(path) {
-	var dracoLoader = new DRACOLoader();
-	// It is recommended to always pull your Draco JavaScript and WASM decoders
-	// from this URL. Users will benefit from having the Draco decoder in cache
-	// as more sites start using the static URL.
-	dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-	
-	dracoLoader.setDecoderConfig( { type: 'js' } );
-
-	dracoLoader.load( path, function ( geometry ) {
-
-		geometry.computeVertexNormals();
-
-		var material = new THREE.MeshStandardMaterial( { color: 0x606060 } );
-		var mesh = new THREE.Mesh( geometry, material );
-		mesh.castShadow = true;
-		mesh.receiveShadow = true;
-		// mesh.position.y = 0.3;
-		scene.add( mesh );
-
-		// Release decoder resources.
-		dracoLoader.dispose();
-
-	} );
-}
-
-function loadBasisTexture(path){
-	return new Promise((resolve, reject)=>{
-		var material = new THREE.MeshStandardMaterial();
-		var loader = new BasisTextureLoader();
-		loader.setTranscoderPath( 'js/libs/basis/' );
-		loader.detectSupport( renderer );
-		loader.load( path, function ( texture ) {
-	
-			texture.encoding = THREE.sRGBEncoding;
-			material.map = texture;
-			material.needsUpdate = true;
-			resolve (material);
-	
-		}, undefined, function ( error ) {
-			console.error( error );
-			reject (error);
-		} );
-		
-	})
-
-}
 
 function displayWindowSize(){
 	// Get width and height of the window excluding scrollbars
@@ -652,36 +268,30 @@ function displayWindowSize(){
 	// camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * THREE.Math.RAD2DEG;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
+	
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+
 }
 
 // Attaching the event listener function to window's resize event
 window.addEventListener("resize", displayWindowSize);
-// document.addEventListener( 'keydown', onKeyDown, false );
-// document.addEventListener( 'keyup', onKeyUp, false );
+
 
 function animate() 
 {
 	
-/*
-	// const hasControlsUpdated = cameraControls.update( delta );
-	requestAnimationFrame(animate);
-	render();
-	renderer.render(scene, camera);
-	var dt = clock.getDelta();
-	engine.update( dt * 0.5);
-	controls.update();
-	stats.update();	
-	//controls.update();
-	
-   */
+
   requestAnimationFrame(animate);
+  
+  raycast();
   render();
   renderer.render(scene, camera);
   controls.update();
   stats.update();
   var dt = clock.getDelta();
-  engine.update( dt * 0.5);	
-  //controls.update();
+  
 }
 
 
@@ -696,17 +306,180 @@ function render()
 	
 }
 //------------------------------------------------------------download
-var c=document.getElementById("canvas");
-function download_image(){
-//	var file = new File(["aa"], "dek_iv.txt");
-//	file.
-  //var canvas = document.getElementById("canvas");
- // var image = canvas.toDataURL("images/Lluvia.mp4");//.replace("image/png", "/images/lava.jpg");
-  var link = document.createElement('a');
-  link.download = "Lluvia.mp4";
-  link.href = "images/Lluvia.mp4";
-  link.click();
+function raycast() {
+      
+	raycaster.setFromCamera( mouse, camera );
+	
+  var intersects = raycaster.intersectObjects(group.children );
+  
+		  if ( intersects.length > 0 ) {
+  
+			  if ( INTERSECTED != intersects[ 0 ].object ) {
+	
+				  if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+	  
+				  INTERSECTED = intersects[ 0 ].object;
+				 // INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+				 // INTERSECTED.material.color.setHex( 0xd4d4d4 );
+	  
+			  }
+	
+		  } else {
+  
+			  if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+	
+			  INTERSECTED = null;
+	
+		  }
+		  //if(indexmodel==2){indexmodel=0;}
+	
+
 }
+function onMouseMove( event ) {
+      
+	event.preventDefault();
+  
+		  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+
+function onMouseClick( event ) {
+
+	if ( INTERSECTED !== null ) INTERSECTED.link.click(); 
+}
+
+	  
+function loadModels() {
+
+	const loader = new GLTFLoader();
+	var dracoLoader = new DRACOLoader();
+		// dracoLoader.setDecoderPath( '/examples/js/libs/draco/' );
+		dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+		loader.setDRACOLoader( dracoLoader );
+		
+	const onLoad = (gltf, position,scale,path,name) => {
+		
+	  const model = gltf.scene.children[0];
+	  model.scale.set(scale[0], scale[1], scale[2]);
+	  model.position.copy(position);
+	 
+	
+	  model.castShadow = true;
+	  model.receiveShadow = true;
+	  
+	  model.traverse( function ( child ) {
+		  if ( child.isMesh ) {
+			  child.castShadow = true;
+			  child.receiveShadow = true;
+			  
+		  
+
+		  }
+		  //childd[Gltf_number]=child;// Downloader
+	  } );
+
+	  scene.add(model);
+	  model.animations; // Array<THREE.AnimationClip>
+	  model.scene; // THREE.Group
+	  model.scenes; // Array<THREE.Group>
+	  model.cameras; // Array<THREE.Camera>
+	  model.asset; // Object
+	 
+	 
+			
+	  var link = document.createElement('a');
+	  link.download = name;
+	  link.href = path;
+	  
+  
+	  function clicked( event ) {
+	  
+		  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+			  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			  
+		raycaster.setFromCamera( mouse, camera );
+	  
+		  var intersects = raycaster.intersectObject(model, true);
+	  
+		console.log(intersects.length)
+  
+		if (intersects.length > 0) {
+			
+			var position = {
+				x: controls.target.x,
+				y: controls.target.y,
+				z: controls.target.z
+			  };
+			
+			console.log("position", position);
+	
+			var target = {
+			  x: intersects[0].point.x,
+			  y: intersects[0].point.y,
+			  z: intersects[0].point.z
+			}
+	
+			console.log("target", target);
+			console.log("clicked");
+	
+
+		 
+		  link.click();
+		} else {
+		
+  
+		  INTERSECTED = null;
+		}
+	  }
+  
+	  renderer.domElement.addEventListener('click', function(event) {
+		// find intersections
+  
+		clicked(event);
+		//camera.updateMatrixWorld();
+  
+  
+	  });
+  
+	};
+  
+  
+	const onProgress = (xhr) => {console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );};
+  
+  
+	const onError = (errorMessage) => {
+		console.log( 'An error happened' );
+		reject(errorMessage);
+	};
+  
+  
+	const parrotPosition = new THREE.Vector3(0, 2, 15);
+	loader.load('https://threejs.org/examples/models/gltf/Parrot.glb', gltf => onLoad(gltf, parrotPosition,[0.01, 0.01, 0.01] , "images/Lluvia.mp4","Lluvia.mp4"), onProgress, onError);
+  
+	const flamingoPosition = new THREE.Vector3(0, 2, 10);
+	loader.load('https://threejs.org/examples/models/gltf/Flamingo.glb', gltf => onLoad(gltf, flamingoPosition,[0.01, 0.01, 0.01] ,"images/Sky.mp4","Sky.mp4"), onProgress, onError);
+  
+	const storkPosition = new THREE.Vector3(0, 2, 5);
+	loader.load('https://threejs.org/examples/models/gltf/Stork.glb', gltf => onLoad(gltf, storkPosition,[0.01, 0.01, 0.01]  ,"images/crate.gif", "crate.gif"), onProgress, onError);
+  
+	
+  
+  
+	const GLTFMAPPosition = new THREE.Vector3(10,  0.001, 10);
+	loader.load('model/gltf/GLTFMATCAP/scene.gltf', gltf => onLoad(gltf, GLTFMAPPosition,[0.1, 0.1, 0.1] ,"images/fibranet.pdf","fibranet.pdf"), onProgress, onError);
+  
+	const miguelangeloPosition = new THREE.Vector3(-10,  0.001, 10);
+	loader.load('model/gltf/miguelangelo/scene.gltf', gltf => onLoad(gltf, miguelangeloPosition,[0.1, 0.1, 0.1]  ,"images/Amanecer.mp4", "grass-512.jpg"), onProgress, onError);
+  
+	
+	const CapoeiraPosition = new THREE.Vector3(1, 0, 10);
+	loader.load('model/gltf/capoeira/Capoeira.gltf', gltf => onLoad(gltf, CapoeiraPosition,[0.01, 0.01, 0.01] , "images/Lluvia.mp4","moondust-xneg.png"), onProgress, onError);
+		
+  
+	
+  }
+  
 init();
 main();
 animate();
