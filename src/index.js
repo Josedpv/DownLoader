@@ -185,39 +185,6 @@ document.body.appendChild( renderer.domElement );
      /*****************************FINISH ADDED CODE**************/
 
 
- /*****************************START ADDED CODE***************/
-     function boxes(){
-		
-		var geometry = new THREE.BoxBufferGeometry( 5, 5 );
-		var material = new THREE.MeshLambertMaterial( { color: 0xdd3322 } );
-		var box = new THREE.Mesh( geometry, material );
-  box.position.set( - 10, 0, 0 );
- box.link = document.createElement('a');
-box.link.download = "Amanecer.mp4";
-box.link.href = "images/Amanecer.mp4";
-		group.add( box );
-  
-		material = new THREE.MeshLambertMaterial( { color: 0x22dd33 } );
-		box = new THREE.Mesh( geometry, material );
-  box.position.set( 0, 0, 0 );
-  box.link = document.createElement('a');
-box.link.download = "checkerboard.jpg";
-box.link.href = "images/checkerboard.jpg";
-
-		group.add( box );
-  
-  material = new THREE.MeshLambertMaterial( { color: 0x3322dd } );
-		box = new THREE.Mesh( geometry, material );
-  box.position.set( 10, 0, 0 );
-  box.link = document.createElement('a');
-box.link.download = "fibranet.pdf";
-box.link.href = "images/fibranet.pdf";
-		group.add( box );
-  
-  scene.add( group )
-  renderer.domElement.addEventListener( 'click', onMouseClick );
-  renderer.domElement.addEventListener( 'mousemove', onMouseMove );
-	 }
      /*****************************FINISH ADDED CODE**************/
 function loadFBX(path,pos,scale) {
 	const promise = new Promise(function (resolve, reject) {
@@ -316,22 +283,20 @@ function raycast() {
   
 			  if ( INTERSECTED != intersects[ 0 ].object ) {
 	
-				  if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+				 
 	  
 				  INTERSECTED = intersects[ 0 ].object;
-				 // INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-				 // INTERSECTED.material.color.setHex( 0xd4d4d4 );
-	  
+				 
 			  }
 	
 		  } else {
   
-			  if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+			 
 	
 			  INTERSECTED = null;
 	
 		  }
-		  //if(indexmodel==2){indexmodel=0;}
+		  
 	
 
 }
@@ -376,7 +341,7 @@ function loadModels() {
 		  
 
 		  }
-		  //childd[Gltf_number]=child;// Downloader
+		  
 	  } );
 
 	  scene.add(model);
@@ -480,6 +445,39 @@ function loadModels() {
 	
   }
   
+ /*****************************START ADDED CODE***************/
+ function boxes(){
+		
+	var geometry = new THREE.BoxBufferGeometry( 5, 5 );
+	var material = new THREE.MeshLambertMaterial( { color: 0xdd3322 } );
+	var box = new THREE.Mesh( geometry, material );
+box.position.set( - 10, 0, 0 );
+box.link = document.createElement('a');
+box.link.download = "Amanecer.mp4";
+box.link.href = "images/Amanecer.mp4";
+	group.add( box );
+
+	material = new THREE.MeshLambertMaterial( { color: 0x22dd33 } );
+	box = new THREE.Mesh( geometry, material );
+box.position.set( 0, 0, 0 );
+box.link = document.createElement('a');
+box.link.download = "checkerboard.jpg";
+box.link.href = "images/checkerboard.jpg";
+
+	group.add( box );
+
+material = new THREE.MeshLambertMaterial( { color: 0x3322dd } );
+	box = new THREE.Mesh( geometry, material );
+box.position.set( 10, 0, 0 );
+box.link = document.createElement('a');
+box.link.download = "fibranet.pdf";
+box.link.href = "images/fibranet.pdf";
+	group.add( box );
+
+scene.add( group )
+renderer.domElement.addEventListener( 'click', onMouseClick );
+renderer.domElement.addEventListener( 'mousemove', onMouseMove );
+ }
 init();
 main();
 animate();
