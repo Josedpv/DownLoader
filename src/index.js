@@ -428,20 +428,25 @@ function loadModels() {
 	const storkPosition = new THREE.Vector3(0, 2, 5);
 	loader.load('https://threejs.org/examples/models/gltf/Stork.glb', gltf => onLoad(gltf, storkPosition,[0.01, 0.01, 0.01]  ,"images/crate.gif", "crate.gif"), onProgress, onError);
   
+	const AssetPackPosition = new THREE.Vector3(-10, 0, -10);
+	loader.load('https://assets-test-o-zone.s3.amazonaws.com/assets2021/Scenes/LilaStudios/AssetPack.gltf', gltf => onLoad(gltf, AssetPackPosition,[0.1, 0.1, 0.1] , "images/moondust-xneg.png","moondust-xneg.png"), onProgress, onError);
+		
 	
+	const ShiseidoPosition = new THREE.Vector3(10, 0, -10);
+	loader.load('https://assets-test-o-zone.s3.amazonaws.com/assets2021/Scenes/Shiseido/Shiseido_Preview/Shiseido.glb', gltf => onLoad(gltf, ShiseidoPosition,[2, 2, 2] , "images/moondust-xneg.png","moondust-xneg.png"), onProgress, onError);
+		
   
   
 	const GLTFMAPPosition = new THREE.Vector3(10,  0.001, 10);
 	loader.load('model/gltf/GLTFMATCAP/scene.gltf', gltf => onLoad(gltf, GLTFMAPPosition,[0.1, 0.1, 0.1] ,"images/fibranet.pdf","fibranet.pdf"), onProgress, onError);
   
 	const miguelangeloPosition = new THREE.Vector3(-10,  0.001, 10);
-	loader.load('model/gltf/miguelangelo/scene.gltf', gltf => onLoad(gltf, miguelangeloPosition,[0.1, 0.1, 0.1]  ,"images/Amanecer.mp4", "grass-512.jpg"), onProgress, onError);
+	loader.load('model/gltf/miguelangelo/scene.gltf', gltf => onLoad(gltf, miguelangeloPosition,[0.1, 0.1, 0.1]  ,"images/grass-512.jpg", "grass-512.jpg"), onProgress, onError);
   
 	
 	const CapoeiraPosition = new THREE.Vector3(1, 0, 10);
-	loader.load('model/gltf/capoeira/Capoeira.gltf', gltf => onLoad(gltf, CapoeiraPosition,[0.01, 0.01, 0.01] , "images/Lluvia.mp4","moondust-xneg.png"), onProgress, onError);
+	loader.load('model/gltf/capoeira/Capoeira.gltf', gltf => onLoad(gltf, CapoeiraPosition,[0.01, 0.01, 0.01] , "images/moondust-xneg.png","moondust-xneg.png"), onProgress, onError);
 		
-  
 	
   }
   
